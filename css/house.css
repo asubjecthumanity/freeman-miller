@@ -1,0 +1,238 @@
+/* The House: quiet walnut-and-mustard UI chrome over a 3D house (owner: integrator).
+   Tokens, the stage and leader lines, boxes, players, map, now-playing chip, phone sheets, and the
+   reduced-motion / no-WebGL layouts. Room-specific rules live in css/rooms/<room>.css, loaded after this. */
+:root {
+  --walnut: #2a1d15;
+  --walnut-2: #3a291e;
+  --line: #634a37;
+  --paper: #f6eddc;
+  --paper-2: #d8c8ae;
+  --mustard: #e8ad38;
+  --mustard-ink: #22170f;
+  --sky-1: #2f7fd2;
+  --sky-ink: #0d2c4a;
+  --leaf: #7cbd42;
+  --brick: #8a3f28;
+  --tan: #c8a77a;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --panel-w: min(392px, 33vw);
+  font-family: "Jost", "Futura", "Avenir Next", system-ui, sans-serif;
+  color: var(--paper);
+  background: #1b1512;
+  -webkit-text-size-adjust: 100%;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: auto; }
+body { margin: 0; background: #1b1512; overflow-x: hidden; }
+button, input { font: inherit; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--mustard); outline-offset: 3px; box-shadow: 0 0 0 6px rgba(20, 12, 6, .55); border-radius: 6px; }
+/* (a heading the keyboard was moved to after a click and a scroll: no ring, as the click showed none) */
+[data-quiet]:focus-visible { outline: none; box-shadow: none; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.skip { position: fixed; left: 16px; top: 12px; z-index: 50; padding: 10px 16px; background: var(--mustard); color: var(--mustard-ink); border-radius: 8px; font-weight: 600; text-decoration: none; transform: translateY(-160%); transition: transform .2s; }
+.skip:focus { transform: none; }
+
+/* ---------- stage ---------- */
+.stage { position: fixed; inset: 0; z-index: 0; background: #5fa8ec; }
+#scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.leaders { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 2; }
+.veil { position: absolute; inset: 0; background: #1b1512; opacity: 0; pointer-events: none; transition: opacity .28s ease; z-index: 1; }
+/* a jump-cut (keyboard focus far away, long map trips): the curtain covers the scene, wires and boxes */
+.is-cutting .veil { transition-duration: .18s; }
+.is-cutting main .panel, .is-cutting .leaders, .is-cutting #sessions, .is-cutting .hello__inner { opacity: 0 !important; transition: opacity .18s ease; }
+.leaders .halo { stroke: rgba(22, 13, 8, .5); stroke-width: 3.5; fill: none; stroke-linecap: round; }
+.leaders .wire { stroke: #fff6e6; stroke-width: 1.4; fill: none; stroke-linecap: round; }
+.leaders .flow { stroke: var(--mustard); stroke-width: 1.6; fill: none; stroke-dasharray: 2 10; stroke-linecap: round; opacity: 0; }
+.leaders .wire-g.flowing > .flow, .leaders .loom.flowing > .flow { opacity: 1; animation: flow 1s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: 24; } }
+.reduced .leaders .flow { animation: none !important; }
+/* the frame loop is asleep (nothing moves or plays): the signal stops marching with it */
+.is-asleep .leaders .flowing > .flow { animation-play-state: paused; }
+.leaders .dot { fill: #fff6e6; stroke: rgba(22, 13, 8, .6); stroke-width: 2; }
+.leaders .ring { fill: none; stroke: #fff6e6; stroke-width: 1.2; opacity: .85; }
+.leaders .tag { font: 500 12.5px/1 "Jost", system-ui, sans-serif; fill: #fff6e6; paint-order: stroke; stroke: rgba(22, 13, 8, .72); stroke-width: 3.5px; stroke-linejoin: round; letter-spacing: .01em; }
+
+/* a link straight into a room: no greeting over the first paint (app.js takes the greeting over at once) */
+.is-deep .hello__inner { opacity: 0; pointer-events: none; }
+
+/* ---------- rooms + panels ---------- */
+main { position: relative; z-index: 3; }
+.room { position: relative; }
+/* a room's steps (the office's sessions): empty sections that give them their scroll length */
+.room--step { pointer-events: none; }
+/* (no overscroll-behavior: contain. A box keeps a wheel, trackpad or swipe gesture only while its own
+   list can scroll; the next gesture at the list's end, and every one over a box with nothing to scroll,
+   moves the journey wherever the pointer is. Chrome stops chaining at a contain box even when it fits.) */
+.panel {
+  position: fixed; right: clamp(16px, 2.6vw, 40px); top: 50%;
+  width: var(--panel-w); max-height: calc(100vh - 120px); overflow: auto;
+  transform: translateY(-50%);
+  padding: 22px 22px 18px; border-radius: 14px;
+  background: rgba(42, 29, 21, .95); border: 1px solid var(--line);
+  box-shadow: 0 24px 48px -18px rgba(12, 6, 2, .65);
+  opacity: 0; pointer-events: none;
+  scrollbar-width: thin; scrollbar-color: var(--line) transparent;
+}
+.panel.is-on { pointer-events: auto; }
+.panel h2 { margin: 0; font-weight: 500; font-size: 1.95rem; line-height: 1.05; letter-spacing: -.005em; }
+.panel h2 em { font-style: italic; font-weight: 500; }
+.panel .lede { margin: .45rem 0 0; color: var(--paper-2); font-size: .98rem; line-height: 1.45; }
+.panel .small { margin: .9rem 0 0; color: var(--paper-2); font-size: .88rem; line-height: 1.45; }
+.panel a { color: var(--paper); text-decoration-color: var(--mustard); text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
+.panel a:hover { color: #fff; text-decoration-thickness: 2.5px; }
+
+.tracks { list-style: none; margin: .9rem 0 0; padding: 0; display: grid; gap: 4px; }
+.track { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center; padding: 8px 8px 8px 6px; border-radius: 10px; }
+.track.is-current { background: var(--walnut-2); }
+.track__play { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--mustard); background: transparent; color: var(--mustard); display: grid; place-items: center; cursor: pointer; padding: 0; }
+.track__play svg { width: 16px; height: 16px; }
+.track__play .i-pause { display: none; }
+.track.is-playing .track__play { background: var(--mustard); color: var(--mustard-ink); }
+.track.is-playing .track__play .i-pause { display: block; }
+.track.is-playing .track__play .i-play { display: none; }
+.track__play:hover { background: rgba(232, 173, 56, .14); }
+.track.is-playing .track__play:hover { background: #f1bd55; }
+.track__line { display: flex; align-items: baseline; gap: .55rem; flex-wrap: wrap; }
+.track__title { font-weight: 500; font-size: 1.04rem; }
+.track__badge { font-size: .8rem; color: var(--paper-2); }
+.track__eq { display: none; gap: 2px; align-items: flex-end; height: 11px; }
+.track.is-playing .track__eq { display: inline-flex; }
+.track__eq i { width: 3px; height: 100%; background: var(--mustard); border-radius: 1px; transform: scaleY(.4); transform-origin: 50% 100%; animation: eq .9s ease-in-out infinite alternate; }
+.track__eq i:nth-child(2) { animation-delay: -.3s; } .track__eq i:nth-child(3) { animation-delay: -.6s; }
+/* (an equaliser in a box that is out of sight does not animate; it scales, so it never needs a layout) */
+main .panel[data-w="0.000"] .track__eq i { animation-play-state: paused; }
+@keyframes eq { to { transform: scaleY(1); } }
+.track__time { flex: none; font-size: .82rem; color: var(--paper-2); font-variant-numeric: tabular-nums; min-width: 4.6em; text-align: right; }
+.track__scrub { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.track__scrub .wave { flex: 1; margin: 0; }
+.track__meta { margin: 2px 0 0; font-size: .84rem; color: var(--paper-2); line-height: 1.35; }
+.track__sub { font-weight: 400; font-style: italic; color: var(--paper-2); }
+.track__info { display: flex; gap: 10px; align-items: flex-start; }
+.track__art { flex: none; width: 52px; height: 52px; border-radius: 4px; margin-top: 4px; object-fit: cover; box-shadow: 0 0 0 1px rgba(246, 237, 220, .15); }
+.track__meta a { color: var(--paper); }
+.wave { position: relative; height: 26px; margin-top: 4px; }
+.wave svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.wave .base { fill: #957b63; } /* 3:1 or more on the box and on the current row (the seek bar's track) */
+.wave .done { fill: var(--mustard); clip-path: inset(0 calc(100% - var(--p, 0%)) 0 0); }
+.wave input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; background: transparent; -webkit-appearance: none; appearance: none; cursor: pointer; }
+.wave input::-webkit-slider-runnable-track { height: 100%; background: transparent; }
+.wave input::-moz-range-track { height: 100%; background: transparent; }
+.wave input::-webkit-slider-thumb { -webkit-appearance: none; width: 4px; height: 26px; border-radius: 2px; background: var(--paper); box-shadow: 0 0 0 1.5px var(--walnut); }
+.wave input::-moz-range-thumb { width: 4px; height: 26px; border: 0; border-radius: 2px; background: var(--paper); }
+.wave input:focus-visible { outline-offset: 2px; }
+
+/* ---------- map ---------- */
+.map { position: fixed; left: clamp(12px, 2vw, 28px); bottom: clamp(12px, 2.4vh, 26px); z-index: 6; }
+.map__toggle { display: none; }
+.map__drawing { position: relative; width: 224px; height: 143px; padding: 0; border-radius: 12px; background: rgba(42, 29, 21, .92); border: 1px solid var(--line); }
+.map__svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.map__ground { stroke: var(--leaf); stroke-width: 2.5; fill: none; }
+.map__roof { stroke: var(--tan); stroke-width: 4; fill: none; }
+.map__deck { stroke: #a24a2f; stroke-width: 2.5; fill: none; }
+.map__list { list-style: none; margin: 0; padding: 0; }
+.map__room a { position: absolute; display: flex; align-items: center; justify-content: center; text-align: center; font-size: .74rem; line-height: 1.05; text-decoration: none; color: var(--paper); border: 1.5px solid #8c7258; background: rgba(246, 237, 220, .04); min-height: 24px; }
+.map__room a:hover { background: rgba(232, 173, 56, .18); }
+.map__room a[aria-current="location"] { background: var(--mustard); color: var(--mustard-ink); border-color: var(--mustard); font-weight: 600; }
+.map__room a[aria-current="location"]::after { content: ""; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--mustard-ink); }
+.map__room--studio a { left: 9%; top: 22%; width: 28%; height: 27%; border-right-width: 0; }
+.map__room--living a { left: 37%; top: 22%; width: 27%; height: 27%; }
+.map__room--theater a { left: 9%; top: 49%; width: 55%; height: 26%; border-top-width: 0; }
+.map__room--office a { left: 68%; top: 26%; width: 30%; height: 26%; }
+.map__room--outside a { left: 3%; top: 80%; width: 94%; height: 17%; border: 0; border-radius: 0 0 8px 8px; background: transparent; }
+.map__room--outside a[aria-current="location"] { background: var(--leaf); color: #10200a; }
+.map__drawing::before { content: ""; position: absolute; left: 64%; top: 24%; width: 4%; height: 56%; background: var(--brick); border-radius: 1px; }
+
+/* ---------- now playing ---------- */
+.now { position: fixed; top: clamp(12px, 2vh, 22px); right: clamp(12px, 2vw, 28px); z-index: 7; display: flex; align-items: center; gap: .6rem; padding: 6px 14px 6px 6px; border-radius: 999px; background: rgba(42, 29, 21, .94); border: 1px solid var(--line); font-size: .9rem; max-width: calc(100vw - 24px); }
+.now[hidden] { display: none; }
+.now__btn { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--mustard); color: var(--mustard-ink); display: grid; place-items: center; cursor: pointer; padding: 0; }
+.now__btn svg { width: 14px; height: 14px; }
+.now__text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+/* over the office's sessions app: down on the desktop, above the map, clear of the window's title bar */
+body:has(#sessions.is-open:not(.is-static)) .now { left: clamp(12px, 2vw, 28px); right: auto; top: auto; bottom: calc(clamp(12px, 2.4vh, 26px) + 153px); max-width: 224px; }
+
+.noscript { position: relative; z-index: 9; margin: 40vh auto; width: min(30rem, calc(100% - 32px)); padding: 1rem; background: var(--walnut); border-radius: 12px; line-height: 1.45; }
+
+/* ---------- phones: panels become bottom sheets, map collapses ---------- */
+@media (max-aspect-ratio: 4/5), (max-width: 760px) and (min-height: 501px) {
+  :root { --panel-w: 100%; }
+  /* a sheet's own list scrolls first; at its end a swipe carries on along the journey */
+  .panel { left: 0; right: 0; top: auto; bottom: 0; width: auto; transform: none; max-height: 47vh; max-height: 47svh; border-radius: 16px 16px 0 0; padding: 18px 16px calc(14px + env(safe-area-inset-bottom)); border-left: 0; border-right: 0; border-bottom: 0; }
+  .panel h2 { font-size: 1.6rem; }
+  .panel::before { content: ""; display: block; width: 40px; height: 4px; margin: -8px auto 10px; border-radius: 2px; background: var(--line); }
+  .map { left: auto; right: 12px; top: 12px; bottom: auto; }
+  .map__toggle { display: flex; align-items: center; gap: .45rem; min-height: 40px; padding: .4rem .95rem .4rem .75rem; border-radius: 999px; border: 1px solid var(--line); background: rgba(42, 29, 21, .94); font-weight: 500; cursor: pointer; margin-left: auto; white-space: nowrap; }
+  .map__toggle svg { width: 18px; height: 18px; flex: none; color: var(--mustard); }
+  .map__drawing { display: none; position: absolute; right: 0; top: 48px; }
+  .map.is-open .map__drawing { display: block; }
+  /* the chip sits at the bottom edge, and above the sheet while a room's box is on */
+  .now { top: auto; bottom: calc(12px + env(safe-area-inset-bottom)); right: 12px; transition: bottom .35s var(--ease); }
+  body:has(main .panel.is-on) .now { bottom: calc(47svh + 10px); }
+  .reduced .now { transition: none; }
+  body:has(#sessions.is-open:not(.is-static)) .now { left: auto; right: 12px; bottom: 46px; max-width: calc(100vw - 24px); }
+  .leaders .tag { display: none; }
+}
+
+/* ---------- short landscape screens (a phone on its side): compact boxes on the right, the map folded
+   into its toggle at the bottom left (top right over the sessions app, where the window keeps room for it) ---------- */
+@media (max-height: 500px) and (min-aspect-ratio: 4/5) {
+  :root { --panel-w: min(360px, 46vw); }
+  .panel { right: 12px; max-height: calc(100vh - 24px); max-height: calc(100svh - 24px); padding: 14px 16px 12px; }
+  .panel h2 { font-size: 1.45rem; }
+  .panel .lede { font-size: .92rem; }
+  .map { left: 12px; bottom: 12px; }
+  .map__toggle { display: flex; align-items: center; gap: .45rem; min-height: 40px; padding: .4rem .95rem .4rem .75rem; border-radius: 999px; border: 1px solid var(--line); background: rgba(42, 29, 21, .94); font-weight: 500; cursor: pointer; white-space: nowrap; }
+  .map__toggle svg { width: 18px; height: 18px; flex: none; color: var(--mustard); }
+  .map__drawing { display: none; position: absolute; left: 0; bottom: 48px; }
+  .map.is-open .map__drawing { display: block; }
+  body:has(#sessions.is-open:not(.is-static)) .map { left: auto; right: 12px; top: 6px; bottom: auto; }
+  body:has(#sessions.is-open:not(.is-static)) .map__toggle { min-height: 34px; padding-block: .25rem; }
+  body:has(#sessions.is-open:not(.is-static)) .map__drawing { bottom: auto; top: 44px; left: auto; right: 0; }
+  body:has(#sessions.is-open:not(.is-static)) .now { left: auto; right: 12px; top: auto; bottom: 40px; max-width: min(320px, 50vw); }
+  /* the now-playing chip sits top right, over the box's corner: the box moves down under it */
+  body:has(#now:not([hidden])) main .panel { top: 66px; transform: none; max-height: calc(100vh - 78px); max-height: calc(100svh - 78px); }
+  .leaders .tag { display: none; }
+}
+
+/* ---------- reduced motion: the same boxes over still views; every move is a curtain cut ---------- */
+.reduced .track__eq i { animation: none; transform: scaleY(.7); }
+/* the curtain's fade (a cut, or a still changing under reduced motion): boxes come back softly */
+.is-revealing main .panel, .is-revealing .leaders, .is-revealing #sessions, .is-revealing .hello__inner { transition: opacity .26s ease; }
+
+/* ---------- no WebGL (or ?flat): stacked rooms, panels in flow over a flat drawing of the house ---------- */
+.no-webgl .room { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; justify-content: flex-end; padding: 10vh clamp(16px, 2.6vw, 40px); height: auto !important; }
+.no-webgl .panel { position: relative; inset: auto; transform: none; opacity: 1; pointer-events: auto; max-height: none; transition: opacity .3s ease; }
+.no-webgl .room--step { display: none; }
+.no-webgl #scene, .no-webgl .leaders { display: none; }
+.no-webgl .stage { background: linear-gradient(#2f7fd2, #9ccdf3 70%, #cfe7f8); }
+/* the stacked page on a wide screen: the rooms fill it, so the map folds into its toggle at the bottom
+   left (as on a phone on its side), and a focused control scrolls clear of it */
+.no-webgl { scroll-padding-bottom: 72px; }
+@media (min-aspect-ratio: 801/1000) and (min-width: 761px) and (min-height: 501px) {
+  .no-webgl .map__toggle { display: flex; align-items: center; gap: .45rem; min-height: 40px; padding: .4rem .95rem .4rem .75rem; border-radius: 999px; border: 1px solid var(--line); background: rgba(42, 29, 21, .94); font-weight: 500; cursor: pointer; white-space: nowrap; }
+  .no-webgl .map__toggle svg { width: 18px; height: 18px; flex: none; color: var(--mustard); }
+  .no-webgl .map__drawing { display: none; position: absolute; left: 0; bottom: 48px; }
+  .no-webgl .map.is-open .map__drawing { display: block; }
+}
+@media (max-aspect-ratio: 4/5), (max-width: 760px) and (min-height: 501px) {
+  .no-webgl .room { align-items: flex-end; padding: 46vh 0 0; }
+  /* (full width: in the flex row a box would otherwise shrink to its content, as the theater's did) */
+  .no-webgl .panel { width: 100%; border-radius: 16px 16px 0 0; max-height: none; }
+}
+@media (prefers-reduced-motion: reduce) { .veil { transition: opacity .2s linear; } }
+
+/* ---------- the still of the house: first paint, and the backdrop without WebGL ---------- */
+/* the 3D lawn view itself (index.html #drawn), centred and cropped like the camera's own view, so the 3D
+   picture fades in over it in place. A 44 x 20 placeholder of the same picture (blurred) shows until it arrives. */
+.drawn { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; transition: opacity .3s ease; }
+.drawn img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; object-position: 50% 50%; }
+.drawn::before { content: ""; position: absolute; inset: -32px; background: url("data:image/webp;base64,UklGRlYBAABXRUJQVlA4IEoBAADQBgCdASosABQAPtFYpUyoJSOiMBqoAQAaCWwAsRwYn1IrwPaO8zE6OiBLKAZUA9lE57Q2JFfflk+IUk5yFwAA/kdHWE/YKNxKtoU4WPPV0LIh5Vd5ODAN3B2VO+0PizVtfWC1cD8Z03Yh+n3jPXWnwLfAsleiTWSjQGvsw7p4L92nS/wPGoeVa2U4nj5vaqyRSZu+dWDyUa66LgHM2DR+UXqDNwpnr3+FYLyoW+Fnnyc5+R+7iIORYsJVOJdpGRcHwH9ICQLrnXbbTFyQEwJ84Y5OL+UyvjKsbp82NCjk3aytMC5lzKSZoWY8JVowS6FVkDGC3n5hZ4qmg503naRKDGK39jIKwj7zP6y8BYhs6msQMgeTJRyMj7k1fwVgFJ7Xs/RGJt05lxvekzgJTiX2AF9mqS5h5tLFDIXHB7TV+/Zw9K58X10AAAA=") 50% 50% / cover no-repeat; filter: blur(12px); }
+@media (max-aspect-ratio: 4/5) { .drawn::before { background-image: url("data:image/webp;base64,UklGRowAAABXRUJQVlA4IIAAAAAQBACdASoQABQAPtFUo0uoJKMhsAgBABoJZgCw7Yq+3ymBOxsvoYVgAAD+bfTaGhyHDn/osN86QiGsnjo+yBiDuc3sez26goVJV7E9hqOLuAkxd7MV8qWWNkkyh0x6y8//9XfnYuVOhNu1bhZXF9fe+lerjXy6VHaLbefLKLRgAA=="); } }
+.world-shown .drawn { opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility 0s linear .3s; }
+.no-webgl .drawn { opacity: 1; visibility: visible; }
+/* the canvas screens draw the film's title in Jost italic: ask for that face with the page's own text */
+.stage::after { content: "a"; position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); font: italic 500 16px "Jost", sans-serif; }
+/* no JavaScript: the drawing, the greeting and the <noscript> note; nothing that would need scripts to work */
+html:not(.js) .hello__hint, html:not(.js) .map, html:not(.js) .skip { display: none; }

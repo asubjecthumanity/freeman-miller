@@ -1,0 +1,2 @@
+/* The studio's box (owner: studio). Nothing studio-specific yet: the box uses the shared track list.
+   Loaded after house.css. Scope new rules to #studio so they cannot reach other rooms. */

@@ -1,0 +1,221 @@
+/* The office (owner: office): its box, and the sessions app the camera hands over to when it zooms
+   into the big display. Loaded after house.css. Rules are scoped to #office. */
+
+/* the sessions app's palette: the teal of the living-room sofa at night, paper text, the house's mustard.
+   Kept in step with PAL in js/world/office-paint.js (the 3D display paints the same picture). */
+#office {
+  --s-bg: #10282f;
+  --s-bg2: #0b1f25;
+  --s-raise: #163640;
+  --s-line: #2c5560;
+  --s-ink: #eef3ef;
+  --s-ink2: #a9c2c0;
+}
+
+/* ---------- the box ---------- */
+#office .olist { list-style: none; margin: .95rem 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+#office .olist__go { width: 100%; min-height: 48px; display: grid; align-content: center; gap: 1px; padding: .4rem .65rem; border-radius: 9px; border: 1px solid transparent; background: rgba(246, 237, 220, .045); text-align: left; cursor: pointer; }
+#office .olist__go:hover { background: rgba(232, 173, 56, .13); border-color: var(--line); }
+#office .olist__name { font-weight: 500; font-size: .98rem; line-height: 1.15; }
+#office .olist__kind { font-size: .8rem; line-height: 1.2; color: var(--paper-2); }
+#office .ohint { margin: 1rem 0 0; display: flex; align-items: center; gap: .55rem .9rem; flex-wrap: wrap; }
+#office .ohint__open { min-height: 42px; padding: .45rem 1.1rem; border-radius: 999px; border: 0; background: var(--mustard); color: var(--mustard-ink); font-weight: 600; cursor: pointer; }
+#office .ohint__open:hover { background: #f1bd55; }
+#office .ohint__or { font-size: .88rem; color: var(--paper-2); }
+/* the lede describes the desk only where the desk is drawn (the stacked no-WebGL page has none) */
+#office .lede__flat, .no-webgl #office .lede__3d { display: none; }
+.no-webgl #office .lede__flat { display: inline; }
+
+/* ---------- the sessions app: his whole display, full viewport ---------- */
+/* (transform-origin 0 0: the hand-over pins it to the display with a projective matrix3d, office-sessions.js frame) */
+#office .sessions { position: fixed; inset: 0; z-index: 2; opacity: 0; pointer-events: none; color: var(--s-ink); transform-origin: 0 0; contain: layout paint; }
+#office .sessions.is-open { pointer-events: auto; }
+#office .desk { position: absolute; inset: 0; background: #283063; }
+#office .desk__wall { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* the agents column and the window sit where the 3D display paints them (DESKTOP in office-paint.js) */
+#office .desk__agents { position: absolute; left: 1.667vw; top: 2.222vh; width: 16.11vw; height: 76.67vh; }
+#office .swin {
+  position: absolute; left: max(270px, 19.44vw); top: 2.222vh; right: 1.389vw; bottom: 2.222vh;
+  display: grid; grid-template-rows: 40px 46px minmax(0, 1fr) 34px; grid-template-columns: minmax(0, 1fr);
+  border-radius: 12px; overflow: hidden; background: var(--s-bg);
+  box-shadow: 6px 10px 0 rgba(5, 10, 14, .45);
+  transition: transform .6s var(--ease), opacity .45s ease;
+}
+#office .swin__bar { display: flex; align-items: center; gap: 14px; padding: 0 20px 0 14px; background: var(--s-bg2); }
+#office .swin__dots { display: flex; gap: 7px; }
+#office .swin__dots i { width: 11px; height: 11px; border-radius: 50%; background: #5d6f73; }
+#office .swin__title { margin: 0 0 0 26px; font-size: 15px; font-weight: 500; }
+#office .swin__count { margin-left: auto; font-size: 13px; color: var(--s-ink2); }
+
+/* tabs: one per session; the five featured, a gap, the three smaller ones */
+#office .stabs-wrap { position: relative; min-width: 0; background: var(--s-bg2); }
+#office .stabs { height: 100%; display: flex; align-items: flex-end; gap: 2px; padding: 0 12px; background: var(--s-bg2); overflow-x: auto; scrollbar-width: none; }
+#office .stabs::-webkit-scrollbar { display: none; }
+/* when the tabs do not fit, the strip scrolls sideways: its edges fade where more tabs wait */
+#office .stabs-wrap::before, #office .stabs-wrap::after { content: ""; position: absolute; top: 0; bottom: 0; z-index: 1; width: 44px; pointer-events: none; opacity: 0; transition: opacity .2s ease; }
+#office .stabs-wrap::before { left: 0; background: linear-gradient(to right, var(--s-bg2) 20%, rgba(11, 31, 37, 0)); }
+#office .stabs-wrap::after { right: 0; background: linear-gradient(to left, var(--s-bg2) 20%, rgba(11, 31, 37, 0)); }
+#office .stabs-wrap.is-more-l::before, #office .stabs-wrap.is-more-r::after { opacity: 1; }
+#office .stabs__gap { flex: none; width: 1.5px; height: 18px; margin: 0 5px 14px 4px; background: var(--s-line); }
+#office .stab { position: relative; flex: none; height: 40px; padding: 0 15px 0 29px; border: 0; border-radius: 8px 8px 0 0; background: transparent; color: var(--s-ink2); font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer; }
+#office .stab:hover { color: var(--s-ink); background: rgba(255, 255, 255, .04); }
+#office .stab[aria-selected="true"] { background: var(--s-bg); color: var(--s-ink); }
+#office .stab[aria-selected="true"]::before { content: ""; position: absolute; left: 12px; right: 12px; top: 0; height: 2.5px; border-radius: 0 0 2px 2px; background: var(--mustard); }
+#office .stab__dot { position: absolute; left: 13px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; border: 1.6px solid currentColor; }
+#office .stab__dot.is-live { background: currentColor; }
+#office .stab[aria-selected="true"] .stab__dot { color: var(--mustard); }
+#office .stab:focus-visible { outline-offset: -3px; }
+
+/* a session */
+#office .swin__body { position: relative; min-height: 0; }
+#office .sp { height: 100%; overflow: auto; display: grid; grid-template-columns: minmax(0, 43fr) minmax(0, 57fr); gap: 48px; padding: 30px 56px 26px; scrollbar-width: thin; scrollbar-color: var(--s-line) transparent; }
+#office .sp[hidden] { display: none; }
+/* a smaller project, words only: set larger, in the middle of the window */
+#office .sp--text { grid-template-columns: minmax(0, 660px); justify-content: center; }
+#office .sp--text .sp__name { font-size: 60px; }
+#office .sp--text .sp__one { font-size: 24px; }
+#office .sp--text .sp__desc { font-size: 18px; color: #d3dfdb; }
+#office .sp:focus-visible { outline-offset: -4px; }
+#office .sp__text { align-self: center; }
+#office .sp__name { margin: 0; font-size: 46px; line-height: 1.04; font-weight: 500; letter-spacing: -.012em; }
+#office .sp__one { margin: 12px 0 0; font-size: 21px; line-height: 1.38; }
+#office .sp__desc { margin: 16px 0 0; font-size: 16px; line-height: 1.58; color: var(--s-ink2); max-width: 62ch; }
+#office .sp__facts { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 7px; }
+#office .sp__facts li { position: relative; padding-left: 26px; font-size: 15px; line-height: 1.45; }
+#office .sp__facts li::before { content: ""; position: absolute; left: 2px; top: .32em; width: 11px; height: 6px; border-left: 2px solid var(--mustard); border-bottom: 2px solid var(--mustard); transform: rotate(-45deg); }
+#office .sp__meta { margin: 18px 0 0; display: grid; gap: 6px; font-size: 14px; line-height: 1.4; }
+#office .sp__meta > div { display: grid; grid-template-columns: 70px 1fr; gap: 10px; align-items: baseline; }
+#office .sp__meta dt { color: var(--s-ink2); }
+#office .sp__meta dd { margin: 0; }
+#office .sp__stack { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 5px; }
+#office .sp__stack li { padding: 1px 9px; border-radius: 999px; border: 1px solid var(--s-line); font-size: 13px; }
+#office .sp__links { margin: 20px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+#office .sp__links a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--mustard); color: var(--s-ink); text-decoration: none; font-weight: 500; font-size: 15px; }
+#office .sp__links a:first-child { background: var(--mustard); color: var(--mustard-ink); }
+#office .sp__links a:hover { background: rgba(232, 173, 56, .18); }
+#office .sp__links a:first-child:hover { background: #f1bd55; }
+
+/* pictures: phones in a strip, screenshots and the film framed */
+#office .sp__media { margin: 0; min-width: 0; align-self: center; }
+#office .sp__media--phones { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 2px 10px; scrollbar-width: thin; scrollbar-color: var(--s-line) transparent; }
+#office .phone { flex: none; height: min(560px, calc(100vh - 250px)); aspect-ratio: 600 / 1304; padding: 6px; border-radius: 28px; background: #05080a; scroll-snap-align: start; }
+#office .phone img { display: block; width: 100%; height: 100%; border-radius: 22px; object-fit: cover; object-position: top; background: var(--s-raise); }
+#office .sp__media--shot img, #office .sp__media--video video, #office .sp__banner { display: block; width: 100%; height: auto; border-radius: 10px; background: var(--s-raise); box-shadow: 4px 8px 0 rgba(0, 0, 0, .3); }
+#office .sp__media--square img { max-height: calc(100vh - 240px); width: auto; max-width: 100%; margin: 0 auto; }
+#office .sp__media--video video { aspect-ratio: 16 / 9; }
+#office .sp__media figcaption { margin: 8px 0 14px; font-size: 13px; color: var(--s-ink2); }
+/* the film's transcript: a disclosure under its caption (the 3D display paints the closed summary too) */
+#office .sp__media--video figcaption { margin-bottom: 2px; }
+#office .sp__tx { margin: 0 0 14px; font-size: 14px; line-height: 1.5; color: var(--s-ink2); }
+#office .sp__tx summary { display: inline-flex; align-items: center; min-height: 32px; color: var(--s-ink); font-weight: 500; text-decoration: underline; text-decoration-color: var(--mustard); text-underline-offset: 3px; cursor: pointer; }
+#office .sp__tx summary:hover { color: #fff; }
+#office .sp__tx-body { margin: 4px 0 6px; padding: 12px 14px; border-radius: 10px; background: var(--s-bg2); }
+#office .sp__tx-body p { margin: 0 0 8px; }
+#office .sp__tx-body ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+#office .sp__tx-at { display: inline-block; min-width: 2.6em; color: var(--mustard); font-variant-numeric: tabular-nums; }
+
+/* status bar */
+#office .swin__status { display: flex; align-items: center; gap: 18px; padding: 0 20px; background: var(--s-bg2); font-size: 13px; color: var(--s-ink2); font-variant-numeric: tabular-nums; }
+#office .swin__steps { display: flex; gap: 6px; }
+#office .swin__steps i { width: 16px; height: 4px; border-radius: 2px; background: var(--s-line); }
+#office .swin__steps i.on { background: var(--mustard); }
+#office .swin__hint { margin-left: auto; }
+
+/* the sign-off: the window steps aside and leaves a note on the desktop */
+#office .so { position: absolute; left: 50%; top: 50%; width: min(540px, calc(100vw - 32px)); padding: 34px 38px 30px; border-radius: 16px; background: rgba(11, 31, 37, .94); border: 1px solid var(--s-line); box-shadow: 6px 12px 0 rgba(5, 10, 14, .4); transform: translate(-50%, -44%); opacity: 0; pointer-events: none; transition: opacity .45s ease, transform .6s var(--ease); }
+#office .sessions.is-signoff .so { opacity: 1; transform: translate(-50%, -50%); }
+#office .sessions.is-open.is-signoff .so { pointer-events: auto; }
+#office .sessions.is-signoff .swin { opacity: 0; transform: translateY(7vh) scale(.94); pointer-events: none; }
+#office .so__h { margin: 0; font-size: 34px; line-height: 1.1; font-weight: 500; }
+#office .so__who { margin: 10px 0 0; font-size: 17px; line-height: 1.5; color: var(--s-ink2); }
+#office .so__who strong { color: var(--s-ink); font-weight: 500; }
+#office .so__list { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 8px; }
+#office .so__link { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; min-height: 52px; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--s-line); color: var(--s-ink); text-decoration: none; }
+#office .so__link:hover { border-color: var(--mustard); background: rgba(232, 173, 56, .08); }
+#office .so__k { color: var(--s-ink2); font-size: 15px; }
+#office .so__v { font-weight: 500; font-size: 16px; overflow-wrap: anywhere; text-align: right; }
+#office .so__again { margin: 18px 0 0; font-size: 15px; }
+#office .so__again a { display: inline-block; padding: 3px 0; min-height: 24px; color: var(--s-ink); text-decoration-color: var(--mustard); text-underline-offset: 3px; }
+
+/* smaller laptops: tighter tabs (all eight fit from about 1240 wide). The agents column stays beside the
+   window at every width (it is 16vw wide and the window starts at 19.44vw, 270px at least). */
+@media (max-width: 1366px) {
+  #office .stab { padding: 0 11px 0 25px; }
+  #office .stab__dot { left: 10px; }
+  #office .stab[aria-selected="true"]::before { left: 9px; right: 9px; }
+}
+
+/* ---------- phones: the window is the whole screen, one column ---------- */
+@media (max-aspect-ratio: 4/5), (max-width: 760px) and (min-height: 501px) {
+  #office .olist__go { min-height: 44px; }
+  #office .desk__agents { display: none; }
+  #office .swin { inset: 0; border-radius: 0; box-shadow: none; grid-template-rows: 60px 48px minmax(0, 1fr) 38px; }
+  #office .swin__bar { padding: 0 104px 0 16px; }
+  #office .swin__title { margin-left: 8px; }
+  #office .swin__count { display: none; }
+  #office .stab { height: 42px; }
+  #office .sp, #office .sp--text { display: flex; flex-direction: column; gap: 0; padding: 22px 18px 30px; }
+  #office .sp__text { display: contents; }
+  #office .sp > *, #office .sp__text > * { flex-shrink: 0; }
+  #office .sp__name, #office .sp--text .sp__name { order: 1; font-size: 34px; }
+  #office .sp--text .sp__one { font-size: 19px; }
+  #office .sp--text .sp__desc { font-size: 16.5px; }
+  #office .sp__one { order: 2; font-size: 18px; }
+  #office .sp__media { order: 3; margin-top: 18px; align-self: stretch; }
+  #office .sp__desc { order: 4; }
+  #office .sp__facts { order: 5; }
+  #office .sp__meta { order: 6; }
+  #office .sp__links { order: 7; }
+  #office .phone { height: min(380px, 52vh); }
+  #office .sp__media--square img { max-height: 52vh; }
+  #office .swin__hint { display: none; }
+  #office .so { padding: 26px 20px 22px; }
+  #office .so__h { font-size: 28px; }
+  #office .so__link { flex-direction: column; align-items: flex-start; gap: 2px; }
+  #office .so__v { text-align: left; }
+}
+
+/* ---------- short landscape screens: the window takes the screen, leaving the map toggle room in its bar
+   (the agents run on the 3D display, which shows the whole desk; the app grows out of its window) ---------- */
+@media (max-height: 500px) and (min-aspect-ratio: 4/5) {
+  #office .desk__agents { display: none; }
+  #office .swin { left: 8px; right: 8px; top: 6px; bottom: 6px; grid-template-rows: 46px 42px minmax(0, 1fr) 30px; }
+  /* the phone screenshots stay readable: as tall as the window's body (not 100vh - 250px, which left 52 px
+     slivers at 844 x 390), at its top beside the name (the text scrolls inside the window and would
+     otherwise centre them below the fold) */
+  #office .sp { padding-top: 16px; padding-bottom: 16px; }
+  #office .sp__media--phones { align-self: start; }
+  #office .phone { height: clamp(220px, calc(100vh - 160px), 320px); height: clamp(220px, calc(100svh - 160px), 320px); }
+  #office .swin__bar { padding-right: 150px; }
+  #office .swin__count { display: none; }
+  #office .stab { height: 38px; }
+  #office .so { max-height: calc(100vh - 16px); max-height: calc(100svh - 16px); overflow: auto; padding: 18px 22px 16px; }
+  #office .so__h { font-size: 26px; }
+}
+
+/* ---------- reduced motion: no zoom, the app simply shows at its steps (behind the curtain) ---------- */
+.reduced #office .swin, .reduced #office .so { transition: none; }
+/* ---------- a jump-cut (End, Back/Forward, a hash, the map): the window or the sign-off is in place
+   before the curtain opens, and the curtain opens on the app alone: the app is opaque from the first
+   frame (so the 3D display, drawn larger than the viewport there, never shows through) and a layer of
+   the curtain's colour fades off it ---------- */
+.is-cutting #office .swin, .is-cutting #office .so { transition: none; }
+.is-revealing #office .sessions.is-open:not(.is-static) { transition: none; }
+.is-revealing #office .sessions.is-open:not(.is-static)::after { content: ""; position: absolute; inset: 0; z-index: 1; background: #1b1512; pointer-events: none; animation: sessions-curtain .26s ease both; }
+@keyframes sessions-curtain { from { opacity: 1; } to { opacity: 0; } }
+/* ---------- no WebGL: the sessions sit in the page after the box ---------- */
+.no-webgl #office { flex-direction: column; align-items: flex-end; justify-content: center; gap: 24px; }
+.no-webgl #office .sessions { position: relative; inset: auto; width: 100%; max-width: 1180px; opacity: 1; pointer-events: auto; transform: none !important; contain: none; }
+.no-webgl #office .desk { display: none; }
+.no-webgl #office .swin { position: relative; inset: auto; grid-template-rows: auto; box-shadow: 0 24px 48px -18px rgba(12, 6, 2, .65); }
+.no-webgl #office .swin__bar { min-height: 44px; }
+.no-webgl #office .sp { height: auto; overflow: visible; }
+.no-webgl #office .phone { height: 460px; }
+.no-webgl #office .swin__status { display: none; }
+.no-webgl #office .so { position: relative; left: auto; top: auto; margin: 24px 0 0 auto; transform: none; opacity: 1; pointer-events: auto; transition: none; }
+@media (max-aspect-ratio: 4/5), (max-width: 760px) and (min-height: 501px) {
+  .no-webgl #office .sessions { padding: 0 0 24px; }
+  .no-webgl #office .swin { border-radius: 16px 16px 0 0; }
+  .no-webgl #office .phone { height: 360px; }
+  .no-webgl #office .so { margin: 16px auto 0; }
+}

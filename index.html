@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Freeman Miller</title>
+<meta name="description" content="Freeman Miller writes piano music, scored the film Paranoia, and builds software with Claude. Step inside the house to listen.">
+<meta name="theme-color" content="#2f7fd2">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%232f7fd2%22/%3E%3Crect x=%225%22 y=%2212%22 width=%2214%22 height=%2210%22 fill=%22%23c8a77a%22/%3E%3Crect x=%224%22 y=%2210%22 width=%2216%22 height=%223%22 fill=%22%23f6eddc%22/%3E%3Crect x=%2219%22 y=%2211%22 width=%223%22 height=%2213%22 fill=%22%238a3f28%22/%3E%3Crect x=%2222%22 y=%2213%22 width=%227%22 height=%226%22 fill=%22%23c8a77a%22/%3E%3Crect x=%224%22 y=%2222%22 width=%2225%22 height=%224%22 fill=%22%237cbd42%22/%3E%3C/svg%3E">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.min.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
+} }
+</script>
+<script>
+  (function () {
+    var d = document.documentElement, flat = false;
+    d.classList.add('js');
+    try { if (matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('reduced'); } catch (e) {}
+    try {
+      var c = document.createElement('canvas');
+      if (/[?&]flat\b/.test(location.search) || !(c.getContext('webgl2') || c.getContext('webgl'))) flat = true;
+    } catch (e) { flat = true; }
+    if (flat) d.classList.add('no-webgl');
+    // a link straight into a room: the greeting stays hidden from the first paint (app.js takes over)
+    else if (/^#(theater|living-room|studio|office)(\/|$)/.test(location.hash)) d.classList.add('is-deep');
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/house.css">
+<link rel="stylesheet" href="css/rooms/outside.css">
+<link rel="stylesheet" href="css/rooms/theater.css">
+<link rel="stylesheet" href="css/rooms/living.css">
+<link rel="stylesheet" href="css/rooms/studio.css">
+<link rel="stylesheet" href="css/rooms/office.css">
+<script defer fetchpriority="high" src="shared/content.js"></script>
+<script type="module" src="js/app.js"></script>
+<!-- the whole module graph in parallel instead of one import level per round trip -->
+<link rel="modulepreload" href="js/path.js">
+<link rel="modulepreload" href="js/journey.js">
+<link rel="modulepreload" href="js/overlay.js">
+<link rel="modulepreload" href="js/player.js">
+<link rel="modulepreload" href="js/ui/common.js">
+<link rel="modulepreload" href="js/ui/outside-box.js">
+<link rel="modulepreload" href="js/ui/theater-box.js">
+<link rel="modulepreload" href="js/ui/living-box.js">
+<link rel="modulepreload" href="js/ui/studio-box.js">
+<link rel="modulepreload" href="js/ui/office-box.js">
+<link rel="modulepreload" href="js/ui/office-sessions.js">
+<link rel="modulepreload" href="js/ui/office-state.js">
+<link rel="modulepreload" href="js/rooms/outside.js">
+<link rel="modulepreload" href="js/rooms/theater.js">
+<link rel="modulepreload" href="js/rooms/living.js">
+<link rel="modulepreload" href="js/rooms/studio.js">
+<link rel="modulepreload" href="js/rooms/office.js">
+<link rel="modulepreload" href="js/world/layout.js">
+<link rel="modulepreload" href="js/world/office-layout.js">
+<link rel="modulepreload" href="js/world/office-paint.js">
+<script>
+  // the 3D house: fetch three.js and the world's modules now, in parallel with the page (after the
+  // modules the first screen needs, listed above); not when the page will be flat
+  if (!document.documentElement.classList.contains('no-webgl')) [
+    'https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.min.js',
+    'https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.core.min.js',
+    'https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/geometries/RoundedBoxGeometry.js',
+    'js/world/world.js',
+    'js/world/kit.js',
+    'js/world/textures.js',
+    'js/world/shell.js',
+    'js/world/exterior.js',
+    'js/world/parts.js',
+    'js/world/theater.js',
+    'js/world/screens/shared.js',
+    'js/world/screens/tv.js',
+    'js/world/screens/poster.js',
+    'js/world/living.js',
+    'js/world/screens/window-view.js',
+    'js/world/studio.js',
+    'js/world/studio-gear.js',
+    'js/world/studio-wall.js',
+    'js/world/studio-merge.js',
+    'js/world/screens/daw.js',
+    'js/world/office.js',
+    'js/world/screens/office-monitor.js',
+  ].forEach(function (u) { var l = document.createElement('link'); l.rel = 'modulepreload'; l.href = u; document.head.appendChild(l); });
+</script>
+</head>
+<body>
+<a class="skip" href="#theater">Skip to the rooms</a>
+
+<div class="stage" aria-hidden="true">
+  <canvas id="scene"></canvas>
+  <svg class="leaders" id="leaders"></svg>
+  <div class="veil" id="veil"></div>
+  <!-- a still of the house on its lawn (the 3D view itself, without the grass tufts; made with
+       shots/polish/measure/still.cjs) shows at once, and the 3D picture fades in over it in place.
+       Without WebGL it stays as the backdrop. -->
+  <div class="drawn" id="drawn"><picture>
+    <source media="(max-aspect-ratio: 4/5)" srcset="img/lawn-port-592.webp 592w, img/lawn-port-888.webp 888w" sizes="79vh">
+    <img src="img/lawn-land-1320.webp" srcset="img/lawn-land-1320.webp 1320w, img/lawn-land-1980.webp 1980w" sizes="(min-aspect-ratio: 11/5) 100vw, 220vh" alt="" fetchpriority="high" onerror="this.remove()">
+  </picture></div>
+</div>
+
+<header class="hello" id="outside" data-stop="0">
+  <div class="hello__inner">
+    <h1 id="hello-title">Hi, I'm Freeman.</h1>
+    <p class="hello__intro" id="intro"></p>
+    <p class="hello__hint" id="hint"><span class="hint__scroll">Scroll to go inside</span><span class="hint__going" aria-hidden="true">Heading inside<i></i></span></p>
+    <button class="go-inside" id="go-inside" type="button">Go inside</button>
+  </div>
+</header>
+
+<nav class="map" id="map" aria-label="House map">
+  <button class="map__toggle" id="map-toggle" type="button" aria-expanded="false" aria-controls="map-rooms">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11.5 12 5l8.5 6.5M6 10v9h12v-9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10.2 19v-4.6h3.6V19" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+    <span class="visually-hidden" id="map-pre">Map. You are </span><span id="map-here">Outside</span>
+  </button>
+  <div class="map__drawing" id="map-rooms">
+    <svg class="map__svg" viewBox="0 0 200 128" aria-hidden="true">
+      <path class="map__ground" d="M0 108 L60 104 L120 101 L200 92"/>
+      <path class="map__roof" d="M18 26 H128 M136 30 H196"/>
+      <path class="map__deck" d="M6 56 H26"/>
+    </svg>
+    <ul class="map__list">
+      <!-- in journey order (the drawing places them) -->
+      <li class="map__room map__room--outside"><a href="#outside" data-stop="0"><span>Outside</span></a></li>
+      <li class="map__room map__room--theater"><a href="#theater" data-stop="1"><span>Theater</span></a></li>
+      <li class="map__room map__room--living"><a href="#living-room" data-stop="2"><span>Living room</span></a></li>
+      <li class="map__room map__room--studio"><a href="#studio" data-stop="3"><span>Studio</span></a></li>
+      <li class="map__room map__room--office"><a href="#office" data-stop="4"><span>Office</span></a></li>
+    </ul>
+  </div>
+</nav>
+
+<p class="visually-hidden" id="status" role="status"></p>
+<div class="now" id="now" hidden>
+  <button class="now__btn" id="now-btn" type="button"></button>
+  <span class="now__text" id="now-text"></span>
+</div>
+
+<main id="rooms">
+  <section class="room" id="theater" data-stop="1" aria-labelledby="theater-h">
+    <div class="panel" id="panel-theater"></div>
+  </section>
+  <section class="room" id="living-room" data-stop="2" aria-labelledby="living-h">
+    <div class="panel" id="panel-living"></div>
+  </section>
+  <section class="room" id="studio" data-stop="3" aria-labelledby="studio-h">
+    <div class="panel" id="panel-studio"></div>
+  </section>
+  <section class="room" id="office" data-stop="4" aria-labelledby="office-h">
+    <div class="panel panel--office" id="panel-office"></div>
+  </section>
+</main>
+
+<noscript><p class="noscript">This house is built with JavaScript. Turn it on to look around and listen.</p></noscript>
+</body>
+</html>

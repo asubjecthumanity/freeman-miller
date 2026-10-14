@@ -1,0 +1,43 @@
+/* Outside (owner: exterior): the greeting in the sky over the house, and the "Go inside" button.
+   Loaded after house.css. Scope new rules to .hello (the header) so they cannot reach other rooms. */
+.hello { position: relative; z-index: 3; height: 0; }
+.hello__inner { position: fixed; left: clamp(20px, 5vw, 72px); top: clamp(22px, 7vh, 80px); max-width: 46rem; transition: opacity .4s ease; }
+/* a soft scrim keeps the sky text above 4.5:1 wherever the clouds and trees fall */
+.hello__inner::before { content: ""; position: absolute; inset: -54px -120px -64px -96px; z-index: -1; background: radial-gradient(closest-side, rgba(10, 36, 74, .6), rgba(10, 36, 74, .5) 62%, rgba(10, 36, 74, 0)); pointer-events: none; }
+.hello h1 { margin: 0; font-weight: 500; font-size: clamp(2.6rem, 5.4vw, 5.2rem); line-height: .98; letter-spacing: -.01em; color: #fff; text-shadow: 0 2px 18px rgba(13, 44, 74, .38); }
+.hello__intro { margin: .7rem 0 0; font-size: clamp(1.05rem, 1.6vw, 1.5rem); line-height: 1.4; color: #fff; max-width: 38rem; text-shadow: 0 1px 10px rgba(13, 44, 74, .5); }
+.hello__hint { margin: 1.3rem 0 0; display: inline-flex; align-items: center; gap: .55rem; padding: .45rem .9rem .45rem .7rem; border-radius: 999px; background: rgba(42, 29, 21, .9); font-size: .95rem; color: var(--paper); }
+.hello__hint::before { content: ""; width: 12px; height: 19px; border: 2px solid var(--paper); border-radius: 7px; box-shadow: inset 0 5px 0 -3px var(--paper); }
+/* the beat before the auto-advance: "Heading inside" and a line that fills while it waits */
+.hint__going { display: none; align-items: center; gap: .65rem; }
+.hint__going i { position: relative; display: block; width: 64px; height: 3px; border-radius: 2px; overflow: hidden; background: rgba(246, 237, 220, .26); }
+.hint__going i::after { content: ""; position: absolute; inset: 0; background: var(--mustard); transform: scaleX(0); transform-origin: left; }
+.is-arming .hint__scroll, .is-entering .hint__scroll { display: none; }
+.is-arming .hint__going, .is-entering .hint__going { display: inline-flex; }
+.is-arming .hello__hint::before, .is-entering .hello__hint::before { display: none; }
+.is-arming .hint__going i::after { animation: beat var(--beat, 1.5s) linear forwards; }
+.is-entering .hint__going i::after { transform: none; }
+@keyframes beat { to { transform: none; } }
+/* inside the house the greeting stays in the document, only quiet */
+.hello__inner.is-away { pointer-events: none; }
+.go-inside { display: none; margin-top: 1.4rem; padding: .7rem 1.3rem; min-height: 44px; border: 0; border-radius: 999px; background: var(--mustard); color: var(--mustard-ink); font-weight: 600; font-size: 1.02rem; cursor: pointer; }
+
+/* phones */
+@media (max-aspect-ratio: 4/5), (max-width: 760px) and (min-height: 501px) {
+  /* below the map's toggle (top right), so the greeting has the whole width */
+  .hello__inner { left: 16px; right: 16px; top: 66px; }
+  .hello h1 { font-size: 2.15rem; }
+  .hello__intro { font-size: 1rem; }
+}
+/* phones on their side: the greeting crosses the treetops behind the house and a cloud, so the scrim
+   reaches further left and holds more of its depth (the intro line keeps 5:1 at 844 x 390 and 740 x 360) */
+@media (max-height: 500px) and (min-aspect-ratio: 4/5) {
+  .hello__inner::before { inset: -46px -120px -60px -150px; background: radial-gradient(closest-side, rgba(10, 36, 74, .7), rgba(10, 36, 74, .6) 68%, rgba(10, 36, 74, 0)); }
+}
+
+/* reduced motion and no WebGL: no auto-advance, a "Go inside" button instead of the hint */
+.reduced .hello__hint, .no-webgl .hello__hint { display: none; }
+.reduced .go-inside, .no-webgl .go-inside { display: inline-flex; align-items: center; }
+/* no WebGL: the greeting is a full first screen of the stacked page */
+.no-webgl .hello { height: 100vh; height: 100svh; overflow: clip; }
+.no-webgl .hello__inner { position: absolute; }

@@ -1,0 +1,47 @@
+/* The living room's box (owner: living): the left/right hand key for the piano and the small covers.
+   Loaded after house.css. Every rule is scoped to #living-room so it cannot reach other rooms. */
+#living-room .hands { display: flex; gap: 1.1rem; margin: .7rem 0 0; font-size: .86rem; color: var(--paper-2); }
+#living-room .hands span { display: inline-flex; align-items: center; gap: .45rem; }
+/* the swatches match the key tints in js/world/living.js (HAND) */
+#living-room .hands b { width: 18px; height: 10px; border-radius: 2px; display: inline-block; box-shadow: 0 0 0 1px rgba(246, 237, 220, .18); }
+#living-room .hands .l b { background: #4f8fe0; }
+#living-room .hands .r b { background: #f2a62a; }
+/* the key is for the 3D keys: the stacked no-WebGL page has no piano to colour */
+.no-webgl #living-room .hands { display: none; }
+
+/* small covers: the artwork, or the designed stand-in for pieces whose cover is still to come */
+#living-room .track__art { width: 46px; height: 46px; margin-top: 2px; border-radius: 3px; }
+#living-room .track__art--standin { display: block; }
+#living-room .track { padding-top: 6px; padding-bottom: 6px; }
+#living-room .track__scrub { margin-top: 2px; }
+#living-room .tracks { margin-top: .75rem; }
+
+/* rows with a cover: the cover sits beside the note and the waveform, so six pieces fit a laptop screen */
+#living-room .track.has-art .track__body { display: grid; grid-template-columns: 46px minmax(0, 1fr); column-gap: 10px; align-items: center; }
+#living-room .track.has-art .track__line { grid-column: 1 / -1; }
+#living-room .track.has-art .track__info { display: contents; }
+#living-room .track.has-art .track__art { grid-column: 1; grid-row: 2 / span 2; margin-top: 3px; }
+#living-room .track.has-art .track__meta, #living-room .track.has-art .track__scrub { grid-column: 2; }
+#living-room .track.has-art .track__meta { margin: 0; }
+
+/* laptop screens up to 860 px tall (1280x800, 1366x768, a 1440x900 screen under its browser bar): tighter
+   rows so all six pieces fit the box (the stacked no-WebGL page keeps its own layout). The slider (the
+   waveform) stays 24 px tall, the play button 40 px. */
+@media (min-aspect-ratio: 4/5) and (min-width: 761px) and (min-height: 501px) and (max-height: 860px) {
+  :root:not(.no-webgl) #living-room .panel { padding-top: 16px; padding-bottom: 12px; }
+  :root:not(.no-webgl) #living-room .panel h2 { font-size: 1.7rem; }
+  :root:not(.no-webgl) #living-room .lede { margin-top: .3rem; font-size: .92rem; line-height: 1.38; }
+  :root:not(.no-webgl) #living-room .hands { margin-top: .45rem; font-size: .82rem; }
+  :root:not(.no-webgl) #living-room .tracks { margin-top: .45rem; gap: 2px; }
+  :root:not(.no-webgl) #living-room .track { padding-top: 3px; padding-bottom: 3px; }
+  :root:not(.no-webgl) #living-room .track__line { line-height: 1.25; }
+  :root:not(.no-webgl) #living-room .track .wave { height: 24px; }
+  :root:not(.no-webgl) #living-room .track__art { width: 42px; height: 42px; }
+  :root:not(.no-webgl) #living-room .track.has-art .track__body { grid-template-columns: 42px minmax(0, 1fr); }
+  :root:not(.no-webgl) #living-room .track.has-art .track__art { margin-top: 1px; }
+}
+/* and a 720-high screen (1280x720) */
+@media (min-aspect-ratio: 4/5) and (min-width: 761px) and (min-height: 501px) and (max-height: 740px) {
+  :root:not(.no-webgl) #living-room .panel { padding-top: 12px; padding-bottom: 8px; }
+  :root:not(.no-webgl) #living-room .tracks { gap: 0; }
+}
